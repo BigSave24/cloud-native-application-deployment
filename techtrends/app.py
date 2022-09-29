@@ -1,3 +1,4 @@
+import mimetypes
 from multiprocessing import connection
 import sqlite3
 from urllib import response
@@ -23,6 +24,17 @@ def get_post(post_id):
 # Define the Flask application
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'your secret key'
+
+# Function to get application health status
+@app.route('/health')
+def get_health_status():
+    response = app.response_class(
+        response=json.dumps({
+            "result": "OK - Healthy"
+            }),
+            status=200
+    )
+    return response
 
 # Define the main route of the web application 
 @app.route('/')
