@@ -25,6 +25,14 @@ def get_post(post_id):
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'your secret key'
 
+# Define the main route of the web application 
+@app.route('/')
+def index():
+    connection = get_db_connection()
+    posts = connection.execute('SELECT * FROM posts').fetchall()
+    connection.close()
+    return render_template('index.html', posts=posts)
+
 # Function to get application health status
 @app.route('/health')
 def get_health_status():
@@ -35,14 +43,6 @@ def get_health_status():
             status=200
     )
     return response
-
-# Define the main route of the web application 
-@app.route('/')
-def index():
-    connection = get_db_connection()
-    posts = connection.execute('SELECT * FROM posts').fetchall()
-    connection.close()
-    return render_template('index.html', posts=posts)
 
 # Define how each individual article is rendered 
 # If the post ID is not found a 404 page is shown
