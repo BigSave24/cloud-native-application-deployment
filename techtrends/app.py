@@ -1,10 +1,14 @@
 import mimetypes
 from multiprocessing import connection
+import multiprocessing
 import sqlite3
+from tkinter.tix import Select
 from urllib import response
 
 from flask import Flask, jsonify, json, render_template, request, url_for, redirect, flash
 from werkzeug.exceptions import abort
+
+# Database connection counter
 
 # Function to get a database connection
 # This function connects to database with the name `datbase.db`
@@ -42,6 +46,26 @@ def get_health_status():
             }),
             status=200
     )
+    return response
+
+# Function to get application metrics
+@app.route('/metrics')
+def get_metrics():
+    connection = get_db_connection()
+    # Increase database connection count
+    total_posts = connection.execute(
+        'Select COUNT(*) FROM database.db'
+    ).fetchall()
+
+    response = app.response_class(
+        status = 200,
+        response = json.dumps({
+            "db_connection_count": 1,
+            "post_count": total_posts
+        }))
+
+    connection.close()
+    # Decrease database connection count
     return response
 
 # Define how each individual article is rendered 
