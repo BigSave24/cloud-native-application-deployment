@@ -9,12 +9,14 @@ from flask import Flask, jsonify, json, render_template, request, url_for, redir
 from werkzeug.exceptions import abort
 
 # Database connection counter
+db_connection_count = 0
 
 # Function to get a database connection
 # This function connects to database with the name `datbase.db`
 def get_db_connection():
     connection = sqlite3.connect('database.db')
     connection.row_factory = sqlite3.Row
+    db_connection_count += 1
     return connection
 
 # Function to get a post using its ID
@@ -22,7 +24,9 @@ def get_post(post_id):
     connection = get_db_connection()
     post = connection.execute('SELECT * FROM posts WHERE id = ?', 
                         (post_id)).fetchone()
+    db_connection_count += 1
     connection.close()
+    db_connection_count -= 1
     return post
 
 # Define the Flask application
@@ -34,7 +38,9 @@ app.config['SECRET_KEY'] = 'your secret key'
 def index():
     connection = get_db_connection()
     posts = connection.execute('SELECT * FROM posts').fetchall()
+    db_connection_count += 1
     connection.close()
+    db_connection_count -= 1
     return render_template('index.html', posts=posts)
 
 # Function to get application health status
@@ -52,20 +58,20 @@ def get_health_status():
 @app.route('/metrics')
 def get_metrics():
     connection = get_db_connection()
-    # Increase database connection count
     total_posts = connection.execute(
-        'Select COUNT(*) FROM database.db'
+        'Select COUNT(*) FROM posts'
     ).fetchall()
+    db_connection_count += 1
 
     response = app.response_class(
         status = 200,
         response = json.dumps({
-            "db_connection_count": 1,
+            "db_connection_count": db_connection_count,
             "post_count": total_posts
         }))
 
     connection.close()
-    # Decrease database connection count
+    db_connection_count -= 1
     return response
 
 # Define how each individual article is rendered 
@@ -96,8 +102,10 @@ def create():
             connection = get_db_connection()
             connection.execute('INSERT INTO posts (title, content) VALUES (?, ?)',
                          (title, content))
+            db_connection_count += 1
             connection.commit()
             connection.close()
+            db_connection_count -= 1
 
             return redirect(url_for('index'))
 
