@@ -2,7 +2,7 @@ import mimetypes
 from multiprocessing import connection
 import multiprocessing
 import sqlite3
-from tkinter.tix import Select
+# from tkinter.tix import Select
 from urllib import response
 
 from flask import Flask, jsonify, json, render_template, request, url_for, redirect, flash
@@ -16,6 +16,7 @@ db_connection_count = 0
 def get_db_connection():
     connection = sqlite3.connect('database.db')
     connection.row_factory = sqlite3.Row
+    global db_connection_count
     db_connection_count += 1
     return connection
 
@@ -24,9 +25,7 @@ def get_post(post_id):
     connection = get_db_connection()
     post = connection.execute('SELECT * FROM posts WHERE id = ?', 
                         (post_id)).fetchone()
-    db_connection_count += 1
     connection.close()
-    db_connection_count -= 1
     return post
 
 # Define the Flask application
@@ -38,9 +37,7 @@ app.config['SECRET_KEY'] = 'your secret key'
 def index():
     connection = get_db_connection()
     posts = connection.execute('SELECT * FROM posts').fetchall()
-    db_connection_count += 1
     connection.close()
-    db_connection_count -= 1
     return render_template('index.html', posts=posts)
 
 # Function to get application health status
@@ -61,17 +58,13 @@ def get_metrics():
     total_posts = connection.execute(
         'Select COUNT(*) FROM posts'
     ).fetchall()
-    db_connection_count += 1
-
     response = app.response_class(
         status = 200,
         response = json.dumps({
             "db_connection_count": db_connection_count,
-            "post_count": total_posts
+            "post_count": len(total_posts)
         }))
-
     connection.close()
-    db_connection_count -= 1
     return response
 
 # Define how each individual article is rendered 
@@ -102,11 +95,8 @@ def create():
             connection = get_db_connection()
             connection.execute('INSERT INTO posts (title, content) VALUES (?, ?)',
                          (title, content))
-            db_connection_count += 1
             connection.commit()
             connection.close()
-            db_connection_count -= 1
-
             return redirect(url_for('index'))
 
     return render_template('create.html')
