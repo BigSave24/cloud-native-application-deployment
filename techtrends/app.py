@@ -41,7 +41,7 @@ def index():
     return render_template('index.html', posts=posts)
 
 # Function to get application health status
-@app.route('/health')
+@app.route('/healthz')
 def get_health_status():
     response = app.response_class(
         response=json.dumps({
