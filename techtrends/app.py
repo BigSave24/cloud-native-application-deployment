@@ -1,10 +1,11 @@
+from cmath import log
 import mimetypes
-from multiprocessing import connection
 import multiprocessing
 import sqlite3
+import logging
 # from tkinter.tix import Select
+from multiprocessing import connection
 from urllib import response
-
 from flask import Flask, jsonify, json, render_template, request, url_for, redirect, flash
 from werkzeug.exceptions import abort
 
@@ -73,13 +74,19 @@ def get_metrics():
 def post(post_id):
     post = get_post(post_id)
     if post is None:
+      # Log Line Message
+      app.logger.info('Article requested not found')
       return render_template('404.html'), 404
     else:
+      # Log Line Message
+      app.logger.info('Article request successful')  
       return render_template('post.html', post=post)
 
 # Define the About Us page
 @app.route('/about')
 def about():
+    # Log Line Message
+    app.logger.info('About Us page request successful')
     return render_template('about.html')
 
 # Define the post creation functionality 
@@ -97,10 +104,14 @@ def create():
                          (title, content))
             connection.commit()
             connection.close()
+            # Log Line Message
+            app.logger.info('New Article created successfully')
             return redirect(url_for('index'))
 
     return render_template('create.html')
 
 # start the application on port 3111
 if __name__ == "__main__":
+   # Stream application logs
+   logging.basicConfig(filename='app.log', level=logging.DEBUG)
    app.run(host='0.0.0.0', port='3111')
