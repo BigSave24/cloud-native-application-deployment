@@ -1,12 +1,7 @@
-# from cmath import log
-# import mimetypes
-# from asyncio.log import logger
-from distutils.log import debug
 import multiprocessing
 import sqlite3
 import logging
-# from tkinter.tix import Select
-# from multiprocessing import connection
+from distutils.log import debug
 from urllib import response
 from flask import Flask, jsonify, json, render_template, request, url_for, redirect, flash
 from werkzeug.exceptions import abort
