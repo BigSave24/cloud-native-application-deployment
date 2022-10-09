@@ -131,3 +131,5 @@ dmypy.json
 # Misc
 database.db
 app.log
+../database.db
+../app.log
