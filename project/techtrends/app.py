@@ -1,3 +1,4 @@
+from logging import handlers
 import multiprocessing
 import sqlite3
 import logging
@@ -109,7 +110,10 @@ def create():
 if __name__ == "__main__":
    # Stream application logs
    logging.basicConfig(
-    filename="app.log", 
+    handlers=[
+        logging.FileHandler('app.log'),
+        logging.StreamHandler()
+    ], 
     level=logging.DEBUG, 
     format='%(levelname)s:%(name)s:%(asctime)s, %(message)s',
     datefmt='%m/%d/%Y, %I:%M:%S %p'
