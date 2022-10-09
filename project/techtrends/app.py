@@ -1,10 +1,12 @@
-from cmath import log
-import mimetypes
+# from cmath import log
+# import mimetypes
+# from asyncio.log import logger
+from distutils.log import debug
 import multiprocessing
 import sqlite3
 import logging
 # from tkinter.tix import Select
-from multiprocessing import connection
+# from multiprocessing import connection
 from urllib import response
 from flask import Flask, jsonify, json, render_template, request, url_for, redirect, flash
 from werkzeug.exceptions import abort
@@ -24,8 +26,7 @@ def get_db_connection():
 # Function to get a post using its ID
 def get_post(post_id):
     connection = get_db_connection()
-    post = connection.execute('SELECT * FROM posts WHERE id = ?', 
-                        (post_id)).fetchone()
+    post = connection.execute('SELECT * FROM posts WHERE id = ?', (post_id)).fetchone()
     connection.close()
     return post
 
@@ -75,18 +76,18 @@ def post(post_id):
     post = get_post(post_id)
     if post is None:
       # Log Line Message
-      app.logger.info('Article requested not found')
+      logging.error('404 Error: Article #%s not found.' %(post_id))
       return render_template('404.html'), 404
     else:
       # Log Line Message
-      app.logger.info('Article request successful')  
+      logging.info('Article "%s" successfully retrieved.' %(post['title']))
       return render_template('post.html', post=post)
 
 # Define the About Us page
 @app.route('/about')
 def about():
     # Log Line Message
-    app.logger.info('About Us page request successful')
+    logging.info('About Us page request successful.')
     return render_template('about.html')
 
 # Define the post creation functionality 
@@ -100,18 +101,22 @@ def create():
             flash('Title is required!')
         else:
             connection = get_db_connection()
-            connection.execute('INSERT INTO posts (title, content) VALUES (?, ?)',
-                         (title, content))
+            connection.execute('INSERT INTO posts (title, content) VALUES (?, ?)', (title, content))
             connection.commit()
             connection.close()
             # Log Line Message
-            app.logger.info('New Article created successfully')
+            logging.info('Article "%s" created successfully.' %(title))
             return redirect(url_for('index'))
 
     return render_template('create.html')
 
-# start the application on port 3111
+# start the application on port 3111info
 if __name__ == "__main__":
    # Stream application logs
-   logging.basicConfig(filename='app.log', level=logging.DEBUG)
-   app.run(host='0.0.0.0', port='3111')
+   logging.basicConfig(
+    filename="app.log", 
+    level=logging.DEBUG, 
+    format='%(levelname)s:%(name)s:%(asctime)s, %(message)s',
+    datefmt='%m/%d/%Y, %I:%M:%S %p'
+    )
+   app.run(debug=True, host='0.0.0.0', port='3111')
