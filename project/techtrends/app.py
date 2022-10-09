@@ -26,7 +26,7 @@ def get_db_connection():
 # Function to get a post using its ID
 def get_post(post_id):
     connection = get_db_connection()
-    post = connection.execute('SELECT * FROM posts WHERE id = ?', (post_id)).fetchone()
+    post = connection.execute('SELECT * FROM posts WHERE id = ?', (post_id,)).fetchone()
     connection.close()
     return post
 
@@ -101,7 +101,7 @@ def create():
             flash('Title is required!')
         else:
             connection = get_db_connection()
-            connection.execute('INSERT INTO posts (title, content) VALUES (?, ?)', (title, content))
+            connection.execute('INSERT INTO posts (title, content) VALUES (?, ?)', (title, content,))
             connection.commit()
             connection.close()
             # Log Line Message
