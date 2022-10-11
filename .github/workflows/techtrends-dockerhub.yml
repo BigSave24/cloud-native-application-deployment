@@ -1,0 +1,44 @@
+# Github action workflow
+
+name: techtrends-dockerhub-deploy
+run-name: ${{ github.actor }} is running this build.
+
+# Action Triggers
+on:
+  push:
+    branches:
+      - "main"
+
+# Action Jobs
+jobs:
+  # Job name
+  app-deployment-build:
+    # Job Runner
+    runs-on: ubuntu-latest
+
+    # Job Steps
+    steps:
+      - 
+        name: Checkout
+        uses: actions/checkout@v3
+      -
+        name: Setup QEMU
+        uses: docker/setup-qemu-action@v2
+      -
+        name: Setup Docker Buildx
+        uses: docker/setup-build-action@v2
+      -
+        name: Login to Docker
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+      -
+        name: Build and Push
+        uses: docker/build-push-action@v3
+        with:
+          context: project/
+          file: project/Dockerfile
+          platforms: linux/amd64
+          push: true
+          tags: ${{ secrets.DOCKERHUB_REPOSITORY}}/techtrends:latest
