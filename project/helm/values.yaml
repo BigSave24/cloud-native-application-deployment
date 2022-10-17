@@ -8,7 +8,7 @@ service:
   type: ClusterIP
 
 image:
-  respository: techtrends
+  respository: kedmond24/techtrends
   tag: latest
   pullPolicy: IfNotPresent
 
