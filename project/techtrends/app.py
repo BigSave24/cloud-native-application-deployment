@@ -54,7 +54,7 @@ def get_health_status():
 def get_metrics():
     connection = get_db_connection()
     total_posts = connection.execute(
-        'Select COUNT(*) FROM posts'
+        'Select * FROM posts'
     ).fetchall()
     response = app.response_class(
         status = 200,
