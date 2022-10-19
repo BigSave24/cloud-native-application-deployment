@@ -3,23 +3,27 @@ import multiprocessing
 import sqlite3
 import logging
 from distutils.log import debug
+from sys import stdout
+import sys
 from urllib import response
 from flask import Flask, jsonify, json, render_template, request, url_for, redirect, flash
 from werkzeug.exceptions import abort
 
-# Database connection counter
-db_connection_count = 0
+# Logging stream handlers
+log_file_output = logging.FileHandler('app.log')
+stdout_handler = logging.StreamHandler(sys.stdout)
+stderr_handler = logging.StreamHandler(sys.stderr)
+handlers = [log_file_output, stdout_handler, stderr_handler]
 
 # Function to get a database connection
 # This function connects to database with the name `datbase.db`
 def get_db_connection():
     connection = sqlite3.connect('database.db')
     connection.row_factory = sqlite3.Row
-    global db_connection_count
-    db_connection_count += 1
+    app.config['db_connection_count'] += 1
     return connection
 
-# Function to get a post using its ID
+# Function to get a post using its IDdb_connection_count
 def get_post(post_id):
     connection = get_db_connection()
     post = connection.execute('SELECT * FROM posts WHERE id = ?', (post_id,)).fetchone()
@@ -29,6 +33,7 @@ def get_post(post_id):
 # Define the Flask application
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'your secret key'
+app.config['db_connection_count'] = 0
 
 # Define the main route of the web application 
 @app.route('/')
@@ -59,7 +64,7 @@ def get_metrics():
     response = app.response_class(
         status = 200,
         response = json.dumps({
-            "db_connection_count": db_connection_count,
+            "db_connection_count": app.config['db_connection_count'],
             "post_count": len(total_posts)
         }))
     connection.close()
@@ -110,10 +115,7 @@ def create():
 if __name__ == "__main__":
    # Stream application logs
    logging.basicConfig(
-    handlers=[
-        logging.FileHandler('app.log'),
-        logging.StreamHandler()
-    ], 
+    handlers=handlers, 
     level=logging.DEBUG, 
     format='%(levelname)s:%(name)s:%(asctime)s, %(message)s',
     datefmt='%m/%d/%Y, %I:%M:%S %p'
