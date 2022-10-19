@@ -16,8 +16,8 @@ stderr_handler = logging.StreamHandler(sys.stderr)
 handlers = [log_file_output, stdout_handler, stderr_handler]
 
 # Function to get a database connection
-# This function connects to database with the name `datbase.db`
 def get_db_connection():
+    """This function connects to database with the name database.db"""
     connection = sqlite3.connect('database.db')
     connection.row_factory = sqlite3.Row
     app.config['db_connection_count'] += 1
